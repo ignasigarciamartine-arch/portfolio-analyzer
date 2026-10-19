@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analitzador de cartera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Kaushan+Script&display=swap" rel="stylesheet">
+<!-- Standalone copy of https://invertirsensecorbata.com/cartera/ . Run python data/build_data.py first, then serve this folder. -->
+<style>
+:root{--bg:#f3ead6;--raise:#fbf6ea;--ink:#1d1a13;--dim:#5b5341;--faint:#857b63;--gold:#b0811f;--gold-soft:#d8ae55;--gold-ink:#16130b;
+  --up:#2c8250;--down:#b5463d;--hair:rgba(29,26,19,.16);--hair-2:rgba(29,26,19,.09);--sans:"Outfit",system-ui,sans-serif;
+  --script:"Kaushan Script",cursive;--pad:clamp(16px,2.4vw,40px);--ease-out:cubic-bezier(.16,1,.3,1)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;padding-bottom:64px}
+button,input,select{font:inherit;color:inherit}.wrap{max-width:1240px;margin:0 auto;padding:0 var(--pad)}
+.display{font-weight:800;text-transform:uppercase;letter-spacing:-.015em;line-height:1;margin:0;font-size:clamp(2.2rem,1.4rem + 3vw,4rem)}
+.s{font-family:var(--script);font-weight:400;text-transform:none;color:var(--gold)}
+.lede{color:var(--dim);margin:20px 0 0}.btn{display:inline-flex;align-items:center;gap:10px;border-radius:99px;padding:13px 22px;font-weight:600;border:1px solid var(--hair);cursor:pointer}
+.btn--gold{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+</style>
+<link rel="stylesheet" href="cartera.css">
+</head>
+<body data-dades="dades-cartera.json">
+<main>
+  <section class="sec pa" aria-labelledby="pa-t">
+    <div class="wrap">
+      <div class="pa__cap">
+        <p class="pa__k">Eina · gratuïta i sense registre</p>
+        <h1 class="display" id="pa-t">Analitzador de <span class="s">cartera</span></h1>
+        <p class="lede">Tria uns quants actius i mira quina combinació hauria tingut menys risc, quina hauria pagat millor cada unitat de risc i com hauria anat en el passat. Tot es calcula al teu navegador amb preus reals des del 2007, passats a euros.</p>
+      </div>
+
+      <div class="pa__grid">
+        <form class="pa__ctl" id="pa-form" autocomplete="off">
+          <fieldset>
+            <legend>1 · Actius</legend>
+            <div id="pa-actius" class="pa__actius"></div>
+            <p class="pa__nota" id="pa-n"></p>
+          </fieldset>
+          <fieldset>
+            <legend>2 · Supòsits</legend>
+            <label class="pa__f">Període <select id="pa-per">
+              <option value="3">Últims 3 anys</option><option value="5">Últims 5 anys</option>
+              <option value="10" selected>Últims 10 anys</option><option value="max">Tot (des del 2007)</option></select></label>
+            <div class="pa__duo">
+              <label class="pa__f">Pes mínim <span class="pa__in"><input id="pa-lo" type="number" min="0" max="20" step="1" value="2"> %</span></label>
+              <label class="pa__f">Pes màxim <span class="pa__in"><input id="pa-hi" type="number" min="10" max="100" step="5" value="40"> %</span></label>
+            </div>
+            <label class="pa__f">Tipus sense risc <span class="pa__in"><input id="pa-rf" type="number" min="0" max="8" step=".25" value="2"> %</span></label>
+          </fieldset>
+          <button class="btn btn--gold pa__go" type="submit">Calcula <span class="arr">→</span></button>
+          <p class="pa__err" id="pa-err" role="alert"></p>
+        </form>
+
+        <div class="pa__res" id="pa-res" aria-live="polite">
+          <div class="pa__met" id="pa-met"></div>
+
+          <article class="pa__card">
+            <header><h2>La frontera eficient</h2><p>Cada punt és una cartera a l'atzar amb els teus actius. Com més a la dreta, més risc; com més amunt, més rendiment. La línia marca les millors combinacions possibles.</p></header>
+            <div class="pa__chart" id="pa-front"></div>
+          </article>
+
+          <div class="pa__duo2">
+            <article class="pa__card">
+              <header><h2>Els pesos</h2><p id="pa-pes-t"></p></header>
+              <div id="pa-pesos" class="pa__pesos"></div>
+            </article>
+            <article class="pa__card">
+              <header><h2>Correlacions</h2><p>1 vol dir que es mouen igual; 0, que no tenen res a veure. Diversificar és juntar actius amb correlació baixa.</p></header>
+              <div id="pa-corr" class="pa__corr"></div>
+            </article>
+          </div>
+
+          <article class="pa__card">
+            <header><h2>Com hauria anat</h2><p>10.000 € invertits a l'inici del període amb la cartera triada, comparats amb repartir-ho a parts iguals i amb la borsa mundial.</p></header>
+            <div class="pa__bt">
+              <label class="pa__f">Rebalanceig <select id="pa-reb"><option value="any" selected>Cada any</option><option value="mes">Cada mes</option><option value="mai">Mai</option></select></label>
+              <label class="pa__f">Aportació mensual <span class="pa__in"><input id="pa-ap" type="number" min="0" step="50" value="0"> €</span></label>
+              <label class="pa__chk"><input type="checkbox" id="pa-filtre"> Filtre de caigudes</label>
+              <label class="pa__chk"><input type="checkbox" id="pa-oos"> Prova fora de mostra</label>
+            </div>
+            <div class="pa__chart" id="pa-bt"></div>
+            <div id="pa-bt-t" class="pa__btt"></div>
+          </article>
+
+          <details class="pa__how">
+            <summary>Com està fet (i què no et diu)</summary>
+            <ul>
+              <li><b>Mínima variància</b> busca la cartera que menys es mou. No fa servir rendiments passats, i per això sol aguantar millor fora de mostra.</li>
+              <li><b>Parts iguals (1/N)</b> no estima res. És difícil de batre: DeMiguel, Garlappi i Uppal (2009) van veure que supera el Sharpe màxim en la majoria de conjunts de dades.</li>
+              <li><b>Sharpe màxim</b> i <b>Sortino màxim</b> premien el rendiment per unitat de risc (el Sortino només compta les baixades). Depenen molt de com han anat els actius en el període triat: és optimitzar mirant el retrovisor.</li>
+              <li>Els pesos es busquen amb un descens de gradient projectat sobre carteres que sumen el 100% i respecten els límits, amb vuit punts de partida. Hem comprovat que dona els mateixos pesos que l'optimitzador SLSQP de SciPy.</li>
+              <li>El <b>filtre de caigudes</b> és la regla del TFM de l'Ignasi: si la mitjana del mes dels actius de borsa i bitcoin cau per sota del −4%, el mes següent aquesta part passa a efectiu.</li>
+              <li>La <b>prova fora de mostra</b> calcula els pesos només amb el primer 60% del període i mira què hauria passat després, sense saber-ho.</li>
+              <li>Preus d'ETFs cotitzats als EUA (Yahoo Finance) convertits a euros, amb dividends reinvertits. No inclou comissions ni impostos. Volatilitat i rendiments anualitzats amb 252 dies de borsa.</li>
+            </ul>
+            <p class="pa__nota">Contingut educatiu. Res d'això és una recomanació d'inversió. Rendiments passats no garanteixen rendiments futurs. Codi obert a <a href="https://github.com/ignasigarciamartine-arch/portfolio-analyzer" target="_blank" rel="noopener">GitHub</a>.</p>
+          </details>
+          <p class="pa__nota" id="pa-act"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="motor.js"></script>
+<script src="cartera.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+[
+  {"name": "6 assets, 5y, 2-40%", "ids": ["SP500","EUROPA","EMERG","BO_7_10","OR","BTC"], "from": "2021-10-19", "rf": 0.02, "lo": 0.02, "hi": 0.40},
+  {"name": "10 assets, 10y, 0-30%", "ids": ["SP500","NASDAQ","EUROPA","JAPO","EMERG","REITS","BO_7_10","BO_20","TIPS","OR"], "from": "2016-10-19", "rf": 0.02, "lo": 0.0, "hi": 0.30},
+  {"name": "4 assets, since 2007, 5-60%", "ids": ["SP500","BO_7_10","OR","MATERIES"], "from": null, "rf": 0.0, "lo": 0.05, "hi": 0.60}
+]
